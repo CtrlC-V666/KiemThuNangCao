@@ -16,23 +16,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Debug - List files
+      run: ls -R
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0'
 
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore KiemThuNangCao.sln  # Sửa lại đúng tên file .sln
 
     - name: Build project
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build KiemThuNangCao.sln --no-restore --configuration Release
 
     - name: Run unit tests
-      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+      run: dotnet test KiemThuNangCao.sln --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
-
       with:
         name: Test Results
         path: TestResults/test_results.trx
