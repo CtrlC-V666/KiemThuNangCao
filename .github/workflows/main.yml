@@ -10,32 +10,29 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Debug - List files
-      run: ls -R
+    - name: Setup .NET Framework Developer Pack 4.7.2
+      run: |
+        choco install netfx-4.7.2-devpack -y
 
-    - name: Setup .NET
+    - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0'
 
-    - name: Detect project file
-      id: detect_project
-      run: echo "PROJECT_FILE=$(find . -name '*.sln' -o -name '*.csproj' | head -n 1)" >> $GITHUB_ENV
-
-    - name: Install dependencies
-      run: dotnet restore $PROJECT_FILE
+    - name: Restore dependencies
+      run: dotnet restore
 
     - name: Build project
-      run: dotnet build $PROJECT_FILE --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release
 
     - name: Run unit tests
-      run: dotnet test $PROJECT_FILE --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
