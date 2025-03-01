@@ -24,14 +24,18 @@ jobs:
       with:
         dotnet-version: '8.0'
 
+    - name: Detect project file
+      id: detect_project
+      run: echo "PROJECT_FILE=$(find . -name '*.sln' -o -name '*.csproj' | head -n 1)" >> $GITHUB_ENV
+
     - name: Install dependencies
-      run: dotnet restore KiemThuNangCao.sln  # Sửa lại đúng tên file .sln
+      run: dotnet restore $PROJECT_FILE
 
     - name: Build project
-      run: dotnet build KiemThuNangCao.sln --no-restore --configuration Release
+      run: dotnet build $PROJECT_FILE --no-restore --configuration Release
 
     - name: Run unit tests
-      run: dotnet test KiemThuNangCao.sln --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+      run: dotnet test $PROJECT_FILE --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
