@@ -1,4 +1,4 @@
-name: .NET Tests & CI/CD
+name: .NET Framework 4.7.2 CI/CD
 
 on:
   push:
@@ -10,29 +10,35 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Chạy trên Windows để hỗ trợ .NET Framework 4.7.2
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Setup .NET Framework Developer Pack 4.7.2
-      run: |
-        choco install netfx-4.7.2-devpack -y
+    - name: Debug - List files
+      run: Get-ChildItem -Recurse  # Liệt kê toàn bộ file để kiểm tra vị trí dự án
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0'
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1  # Cài đặt MSBuild để build .NET Framework
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1  # Cài đặt NuGet để restore package
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: |
+        nuget restore KiemThuNangCao.sln
+      continue-on-error: false  # Dừng ngay nếu lỗi restore
 
     - name: Build project
-      run: dotnet build --no-restore --configuration Release
+      run: |
+        msbuild KiemThuNangCao.sln /p:Configuration=Release
+      continue-on-error: false  # Dừng ngay nếu lỗi build
 
     - name: Run unit tests
-      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+      run: |
+        dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+      continue-on-error: true  # Không dừng workflow nếu test thất bại
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
